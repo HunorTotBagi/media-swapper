@@ -1,15 +1,7 @@
-// Swaps playback between a Spotify Web Player tab and a YouTube tab:
-// - a click on the toolbar icon pauses whichever one is playing and starts
-//   the other;
-// - when VS Code gets focus, YouTube is paused and Spotify starts (the
-//   companion VS Code extension tells us about focus);
-// - when a YouTube video starts playing, Spotify is paused.
-
 const SPOTIFY_URL = 'https://open.spotify.com/*';
 const YOUTUBE_URL = 'https://www.youtube.com/*';
 const VSCODE_BRIDGE_URL = 'ws://127.0.0.1:47823';
 
-// Run tasks one at a time so rapid triggers don't interleave.
 let pending = Promise.resolve();
 function queue(task) {
   pending = pending.then(task).catch((err) => console.error('Media Swapper:', err));
@@ -19,8 +11,6 @@ chrome.action.onClicked.addListener(() => queue(swap));
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'youtube-play') queue(onYouTubePlay);
 });
-
-// --- Connection to the VS Code extension ---
 
 let bridge;
 function connectBridge() {
@@ -32,18 +22,13 @@ function connectBridge() {
 }
 
 connectBridge();
-// Chrome stops an idle service worker after 30s. Sending a message every 20s
-// keeps it (and the connection) alive while VS Code is running...
 setInterval(() => {
   if (bridge?.readyState === WebSocket.OPEN) bridge.send('keepalive');
 }, 20_000);
-// ...and this alarm wakes it up to retry while VS Code isn't running.
 chrome.alarms.create('connect-bridge', { periodInMinutes: 0.5 });
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === 'connect-bridge') connectBridge();
 });
-
-// --- Actions ---
 
 async function swap() {
   const spotifyTab = await findSpotifyTab();
@@ -68,21 +53,15 @@ async function onYouTubePlay() {
   if (spotifyTab) await pauseSpotify(spotifyTab);
 }
 
-// --- Spotify ---
-
 async function findSpotifyTab() {
   return pickTab(await chrome.tabs.query({ url: SPOTIFY_URL }));
 }
 
 async function isSpotifyPlaying(tab) {
-  // spotify-hook.js knows the exact state, unless the tab was opened before the
-  // extension loaded or the hook hasn't seen Spotify's audio yet. Then fall
-  // back to Chrome's "audible" flag (which lags by a second or two).
   const hooked = await runInTab(tab, () => window.__mediaSwapper?.isPlaying() ?? null, [], 'MAIN');
   return hooked ?? tab.audible;
 }
 
-// Spotify only has a toggle button, so check the state before clicking it.
 async function pauseSpotify(tab) {
   if (!(await isSpotifyPlaying(tab))) return;
   await runInTab(tab, clickSpotifyPlayPause);
@@ -95,13 +74,10 @@ async function playSpotify(tab) {
   if (!clicked) flashBadge();
 }
 
-// --- YouTube ---
-
 function findYouTubeTabs() {
   return chrome.tabs.query({ url: YOUTUBE_URL });
 }
 
-// Returns whether anything was playing.
 async function pauseYouTube(tabs) {
   let pausedAny = false;
   for (const tab of tabs) {
@@ -123,9 +99,6 @@ async function resumeYouTube(tabs) {
   if (!tab || !(await runInTab(tab, resumeVideo))) flashBadge();
 }
 
-// --- Helpers ---
-
-// Prefer a tab that's making sound, then the one used most recently.
 function pickTab(tabs) {
   return tabs.toSorted(
     (a, b) => (b.audible ? 1 : 0) - (a.audible ? 1 : 0) || (b.lastAccessed ?? 0) - (a.lastAccessed ?? 0),
@@ -142,18 +115,14 @@ async function runInTab(tab, func, args = [], world = 'ISOLATED') {
   }
 }
 
-// Stop Chrome's Memory Saver from unloading a paused tab we'll want to resume.
 function keepLoaded(tab) {
   return chrome.tabs.update(tab.id, { autoDiscardable: false }).catch(() => {});
 }
 
-// Show a brief "?" on the toolbar icon when there was nothing to switch to.
 function flashBadge() {
   chrome.action.setBadgeText({ text: '?' });
   setTimeout(() => chrome.action.setBadgeText({ text: '' }), 2000);
 }
-
-// --- Injected into the page: these must not reference anything outside themselves. ---
 
 function pauseVideos() {
   const playing = [...document.querySelectorAll('video')].filter((v) => !v.paused);
@@ -167,14 +136,12 @@ async function resumeVideo() {
   const video =
     remembered[0] ?? document.querySelector('video.html5-main-video') ?? document.querySelector('video');
   if (!video) return false;
-  // Tells youtube-watcher.js this play came from us, not from a click, so it
-  // doesn't report it (that could toggle Spotify back on while "audible" lags).
   window.__mediaSwapperResuming = true;
   try {
     await video.play();
     return true;
   } catch {
-    return false; // e.g. blocked by Chrome's autoplay rules
+    return false;
   } finally {
     window.__mediaSwapperResuming = false;
   }
