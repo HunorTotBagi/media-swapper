@@ -10,14 +10,12 @@ While I work, I have Spotify open in Chrome on one screen and YouTube on the oth
 
 When I give a prompt to my coding agent (Claude Code) and it starts working, I watch a YouTube video while I wait. That means first going over to Spotify to pause the music. When the agent finishes, I review the code, and I can't pay attention to a video while doing that, so I pause YouTube and start Spotify again.
 
-Doing that by hand dozens of times a day got old. The first version was a single hotkey that swapped the two. It turned out the moments to switch are always the same: going back to VS Code means "work, music on", and starting a video means "break, music off". So now it happens automatically.
-
 ## A typical loop
 
-| You do | Media Swapper does |
-| --- | --- |
-| Write a prompt in VS Code | Spotify is playing |
-| Go to YouTube and click play | Spotify pauses |
+| You do                                             | Media Swapper does                |
+| -------------------------------------------------- | --------------------------------- |
+| Write a prompt in VS Code                          | Spotify is playing                |
+| Go to YouTube and click play                       | Spotify pauses                    |
 | The agent finishes and you click back into VS Code | YouTube pauses and Spotify starts |
 
 ## What every action does
@@ -26,14 +24,14 @@ Doing that by hand dozens of times a day got old. The first version was a single
 
 This happens once VS Code has kept focus for **1 second**, so quickly alt-tabbing through it doesn't count. It only works while **Auto-swap** is on (see [the status bar toggle](#the-vs-code-status-bar-toggle)).
 
-| YouTube | Spotify | Result |
-| --- | --- | --- |
-| Playing | Paused | YouTube pauses and Spotify starts |
-| Playing | Playing | YouTube pauses and Spotify keeps playing |
-| Paused or not open | Paused | Spotify starts |
-| Paused or not open | Playing | Nothing changes |
-| Playing | Tab not open | YouTube pauses and the toolbar icon shows **?** |
-| Paused or not open | Tab not open | The toolbar icon shows **?** |
+| YouTube            | Spotify      | Result                                          |
+| ------------------ | ------------ | ----------------------------------------------- |
+| Playing            | Paused       | YouTube pauses and Spotify starts               |
+| Playing            | Playing      | YouTube pauses and Spotify keeps playing        |
+| Paused or not open | Paused       | Spotify starts                                  |
+| Paused or not open | Playing      | Nothing changes                                 |
+| Playing            | Tab not open | YouTube pauses and the toolbar icon shows **?** |
+| Paused or not open | Tab not open | The toolbar icon shows **?**                    |
 
 - Videos playing in **any** YouTube tab are paused.
 - Every VS Code window counts, not just the first one you opened.
@@ -41,9 +39,9 @@ This happens once VS Code has kept focus for **1 second**, so quickly alt-tabbin
 
 ### Starting a YouTube video
 
-| Spotify | Result |
-| --- | --- |
-| Playing | Spotify pauses |
+| Spotify            | Result          |
+| ------------------ | --------------- |
+| Playing            | Spotify pauses  |
 | Paused or not open | Nothing changes |
 
 - **Counts:** clicking play, pressing Space or `K`, the next video autoplaying, and opening a video link that starts by itself.
@@ -54,15 +52,15 @@ This happens once VS Code has kept focus for **1 second**, so quickly alt-tabbin
 
 This is the manual swap: it pauses whichever one is playing and starts the other.
 
-| Spotify | YouTube | Result |
-| --- | --- | --- |
-| Playing | Paused | Spotify pauses and YouTube resumes |
-| Playing | Playing | Spotify pauses and YouTube keeps playing |
-| Playing | No video open | Spotify pauses and the icon shows **?** |
-| Paused | Playing | YouTube pauses and Spotify starts |
-| Paused | Paused or not open | Spotify starts |
-| Tab not open | Playing | YouTube pauses and the icon shows **?** |
-| Tab not open | Paused or not open | The icon shows **?** |
+| Spotify      | YouTube            | Result                                   |
+| ------------ | ------------------ | ---------------------------------------- |
+| Playing      | Paused             | Spotify pauses and YouTube resumes       |
+| Playing      | Playing            | Spotify pauses and YouTube keeps playing |
+| Playing      | No video open      | Spotify pauses and the icon shows **?**  |
+| Paused       | Playing            | YouTube pauses and Spotify starts        |
+| Paused       | Paused or not open | Spotify starts                           |
+| Tab not open | Playing            | YouTube pauses and the icon shows **?**  |
+| Tab not open | Paused or not open | The icon shows **?**                     |
 
 When YouTube resumes, it's the video the extension paused last. If that tab is gone, it's the video tab you used most recently.
 
@@ -70,10 +68,10 @@ When YouTube resumes, it's the video the extension paused last. If that tab is g
 
 The **Auto-swap** item is at the bottom right of VS Code.
 
-| Status bar shows | Meaning |
-| --- | --- |
-| Speaker icon, **Auto-swap** | On: clicking into VS Code switches to Spotify |
-| Muted speaker icon, **Auto-swap off** | Off: clicking into VS Code does nothing |
+| Status bar shows                      | Meaning                                       |
+| ------------------------------------- | --------------------------------------------- |
+| Speaker icon, **Auto-swap**           | On: clicking into VS Code switches to Spotify |
+| Muted speaker icon, **Auto-swap off** | Off: clicking into VS Code does nothing       |
 
 Click it to switch, or run **Media Swapper: Toggle Auto-Swap on Focus** from the Command Palette. All VS Code windows share the setting, and it's remembered after a restart. Turn it off when you want to keep a video on while reviewing.
 
@@ -139,12 +137,12 @@ flowchart LR
 
 A Chrome extension can't receive messages from programs outside the browser on its own. So the VS Code extension runs a tiny WebSocket server on `127.0.0.1:47823`, and the Chrome extension connects to it.
 
-| File | What it does |
-| --- | --- |
-| [chrome-extension/background.js](chrome-extension/background.js) | Decides what to pause and play, and keeps the connection to VS Code |
-| [chrome-extension/youtube-watcher.js](chrome-extension/youtube-watcher.js) | Tells the extension when a YouTube video starts |
-| [chrome-extension/spotify-hook.js](chrome-extension/spotify-hook.js) | Lets the extension read Spotify's real play/pause state (Spotify's only control is a single play/pause toggle button, so it must know the state before clicking) |
-| [vscode-extension/extension.js](vscode-extension/extension.js) | Reports VS Code focus, runs the local server, and shows the status bar toggle |
+| File                                                                       | What it does                                                                                                                                                     |
+| -------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [chrome-extension/background.js](chrome-extension/background.js)           | Decides what to pause and play, and keeps the connection to VS Code                                                                                              |
+| [chrome-extension/youtube-watcher.js](chrome-extension/youtube-watcher.js) | Tells the extension when a YouTube video starts                                                                                                                  |
+| [chrome-extension/spotify-hook.js](chrome-extension/spotify-hook.js)       | Lets the extension read Spotify's real play/pause state (Spotify's only control is a single play/pause toggle button, so it must know the state before clicking) |
+| [vscode-extension/extension.js](vscode-extension/extension.js)             | Reports VS Code focus, runs the local server, and shows the status bar toggle                                                                                    |
 
 **Privacy:** nothing leaves your computer. The server listens only on `127.0.0.1`, accepts connections only from browser extensions (not web pages), and nothing is collected or sent anywhere.
 
