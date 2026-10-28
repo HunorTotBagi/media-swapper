@@ -4,12 +4,13 @@
   "description": "Tells the Media Swapper Chrome extension when VS Code gets focus, so it can pause YouTube and play Spotify.",
   "version": "0.1.0",
   "publisher": "local",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.80.0"
   },
   "activationEvents": ["onStartupFinished"],
   "main": "./extension.js",
-  "files": ["extension.js"],
+  "files": ["extension.js", "icon.png"],
   "contributes": {
     "commands": [
       {
