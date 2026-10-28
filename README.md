@@ -1,6 +1,4 @@
-<img src="assets/logo.png" alt="Media Swapper logo" width="96">
-
-# Media Swapper
+# <img src="assets/logo.png" alt="" width="48" align="center"> Media Swapper
 
 **Music while you review code, YouTube while your AI agent works, switched automatically.**
 
