@@ -1,6 +1,6 @@
 // Swaps playback between a Spotify Web Player tab and a YouTube tab:
-// - the hotkey (or a click on the toolbar icon) pauses whichever one is
-//   playing and starts the other;
+// - a click on the toolbar icon pauses whichever one is playing and starts
+//   the other;
 // - when VS Code gets focus, YouTube is paused and Spotify starts (the
 //   companion VS Code extension tells us about focus);
 // - when a YouTube video starts playing, Spotify is paused.
@@ -15,9 +15,6 @@ function queue(task) {
   pending = pending.then(task).catch((err) => console.error('Media Swapper:', err));
 }
 
-chrome.commands.onCommand.addListener((command) => {
-  if (command === 'swap-media') queue(swap);
-});
 chrome.action.onClicked.addListener(() => queue(swap));
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'youtube-play') queue(onYouTubePlay);

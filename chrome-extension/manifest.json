@@ -2,21 +2,14 @@
   "manifest_version": 3,
   "name": "Media Swapper",
   "version": "0.2.0",
-  "description": "Swap playback between YouTube and Spotify with a hotkey, or automatically as you move between VS Code and YouTube.",
+  "description": "Swap playback between YouTube and Spotify automatically as you move between VS Code and YouTube.",
   "permissions": ["alarms", "scripting", "storage"],
   "host_permissions": ["https://open.spotify.com/*", "https://www.youtube.com/*"],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Swap YouTube / Spotify (Ctrl+Shift+9)"
-  },
-  "commands": {
-    "swap-media": {
-      "suggested_key": { "default": "Ctrl+Shift+9" },
-      "description": "Swap between YouTube and Spotify",
-      "global": true
-    }
+    "default_title": "Swap YouTube / Spotify"
   },
   "content_scripts": [
     {
